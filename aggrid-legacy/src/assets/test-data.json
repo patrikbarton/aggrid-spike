@@ -1,0 +1,4 @@
+[
+  { "id": 1, "make": "Toyota", "model": "A", "price": 12345, "value": 0.2345 },
+  { "id": 2, "make": "Ford",   "model": "B", "price": 54321, "value": 0.6789 }
+]

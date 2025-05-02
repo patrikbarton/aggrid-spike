@@ -1,19 +1,41 @@
-<div class="toolbar">
-    <div class="buttons">
-        <button (click)="loadData(50000)">Load 50 000 Rows</button>
-        <button (click)="loadData(100000)">Load 100 000 Rows</button>
-    </div>
-    <div class="status">
-        {{ rowData.length || 0 }} rows loaded
-    </div>
-</div>
+<div class="container">
+    <!-- App title -->
+    <header class="app-header">
+        🚗 Vehicle Data Explorer
+    </header>
 
-<div class="grid-wrapper">
-    <ag-grid-angular
-            class="ag-theme-alpine"
-            [gridOptions]="gridOptions"
-            [columnDefs]="columnDefs"
-            [rowData]="rowData"
-            (firstDataRendered)="onFirstDataRendered()">
-    </ag-grid-angular>
+    <!-- Toolbar with buttons + search -->
+    <div class="toolbar">
+        <div class="buttons">
+            <button (click)="loadData(50000)">Load 50 000 Rows</button>
+            <button (click)="loadData(100000)">Load 100 000 Rows</button>
+        </div>
+        <div class="search">
+            <input
+                    type="text"
+                    placeholder="Quick search..."
+                    (input)="onQuickFilter($event)"
+            />
+        </div>
+    </div>
+
+    <!-- Card wrapper around the grid -->
+    <div class="card">
+        <div class="card-body">
+            <div class="grid-wrapper">
+                <ag-grid-angular
+                        class="ag-theme-alpine"
+                        [gridOptions]="gridOptions"
+                        [columnDefs]="columnDefs"
+                        [rowData]="rowData"
+                        (firstDataRendered)="onFirstDataRendered()"
+                        (gridReady)="onGridReady($event)"
+                >
+                </ag-grid-angular>
+            </div>
+        </div>
+        <div class="card-footer">
+            {{ rowData.length || 0 }} rows loaded
+        </div>
+    </div>
 </div>

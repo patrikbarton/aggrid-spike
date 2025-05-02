@@ -1,0 +1,88 @@
+/* overall page container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: #f0f2f5;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* top title */
+.app-header {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+/* toolbar */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+/* styled buttons */
+.toolbar .buttons button {
+    background: #007acc;
+    border: none;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+.toolbar .buttons button:hover {
+    background: #005fa3;
+}
+
+/* quick-filter input */
+.toolbar .search input {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+}
+
+/* the “card” container */
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    flex: 1;               /* take remaining vertical space */
+    min-height: 0;         /* allow children to shrink */
+    overflow: hidden;
+}
+
+/* grid body */
+.card-body {
+    flex: 1;
+    position: relative;    /* for absolute children if needed */
+}
+
+/* grid wrapper (fills the card body) */
+.grid-wrapper > ag-grid-angular {
+    display: block;    /* ensure it’ll honor width/height */
+    width: 100%;
+    height: 100%;
+}
+
+/* footer with row count */
+.card-footer {
+    padding: 0.6rem 1rem;
+    background: #fafafa;
+    border-top: 1px solid #e1e1e1;
+    font-size: 0.9rem;
+    text-align: right;
+    color: #555;
+}
