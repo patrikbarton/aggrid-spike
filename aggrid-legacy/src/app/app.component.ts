@@ -1,4 +1,3 @@
-// src/app/app.component.ts
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import {
     ColDef,
@@ -69,12 +68,20 @@ export class AppComponent {
             imageUrl: `assets/car-images/${this.makes[i % this.makes.length].toLowerCase()}.png`
         }));
         performance.mark('gen-end');
-        performance.measure('genTime','gen-start','gen-end');
+        performance.measure(
+            'Data Generation Time',
+            'gen-start',
+            'gen-end'
+        );
 
         performance.mark('set-start');
         this.gridApi.setRowData(data);
         performance.mark('set-end');
-        performance.measure('setTime','set-start','set-end');
+        performance.measure(
+            'Data Binding Time',
+            'set-start',
+            'set-end'
+        );
 
         performance.mark('render-start');
         // render-end is captured in onFirstDataRendered
@@ -82,7 +89,11 @@ export class AppComponent {
 
     onFirstDataRendered(event: FirstDataRenderedEvent) {
         performance.mark('render-end');
-        performance.measure('renderTime','render-start','render-end');
+        performance.measure(
+            'Initial Render Time',
+            'render-start',
+            'render-end'
+        );
         this.captureMetrics();
     }
 
@@ -101,7 +112,11 @@ export class AppComponent {
         performance.mark('delta-start');
         this.gridApi.updateRowData({ add: adds, update: updates, remove: removes });
         performance.mark('delta-end');
-        performance.measure('deltaTime','delta-start','delta-end');
+        performance.measure(
+            'Delta Update Time',
+            'delta-start',
+            'delta-end'
+        );
 
         this.captureMetrics();
     }
@@ -114,7 +129,11 @@ export class AppComponent {
         performance.mark('sort-start');
         this.gridApi.setSortModel([{ colId, sort: 'asc' }]);
         performance.mark('sort-end');
-        performance.measure('sortTime','sort-start','sort-end');
+        performance.measure(
+            'Sort Time',
+            'sort-start',
+            'sort-end'
+        );
 
         this.captureMetrics();
     }
@@ -127,7 +146,11 @@ export class AppComponent {
         performance.mark('filter-start');
         this.gridApi.setQuickFilter(filterValue);
         performance.mark('filter-end');
-        performance.measure('filterTime','filter-start','filter-end');
+        performance.measure(
+            'Filter Time',
+            'filter-start',
+            'filter-end'
+        );
 
         this.captureMetrics();
     }
@@ -144,7 +167,11 @@ export class AppComponent {
             await new Promise(r => requestAnimationFrame(r));
         }
         performance.mark('scroll-end');
-        performance.measure('scrollTime','scroll-start','scroll-end');
+        performance.measure(
+            'Scroll Test Time',
+            'scroll-start',
+            'scroll-end'
+        );
 
         this.captureMetrics();
     }
@@ -163,7 +190,11 @@ export class AppComponent {
         performance.mark('group-start');
         this.gridApi.setColumnDefs(defs);
         performance.mark('group-end');
-        performance.measure('groupTime','group-start','group-end');
+        performance.measure(
+            'Grouping Time',
+            'group-start',
+            'group-end'
+        );
 
         this.captureMetrics();
     }
@@ -173,5 +204,4 @@ export class AppComponent {
             this.metrics[m.name] = m.duration;
         });
     }
-
 }
