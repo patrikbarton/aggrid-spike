@@ -1,6 +1,1 @@
-/* You can add global styles to this file, and also import other style files */
-/* in your global styles or component CSS */
-.ag-theme-alpine .ag-header-cell,
-.ag-theme-alpine .ag-cell {
-    color: black !important;
-}
+@import "~ag-grid-community/dist/styles/ag-theme-material.css";
