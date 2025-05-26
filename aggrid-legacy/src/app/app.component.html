@@ -35,7 +35,9 @@
                     [columnDefs]="columnDefs"
                     [rowData]="rowData"
                     (gridReady)="onGridReady($event)"
-                    (firstDataRendered)="onFirstDataRendered($event)">
+                    (firstDataRendered)="onFirstDataRendered($event)"
+                    [rowBuffer]="rowData.length"
+                    [suppressMaxRenderedRowRestriction]="true">
             </ag-grid-angular>
         </section>
 

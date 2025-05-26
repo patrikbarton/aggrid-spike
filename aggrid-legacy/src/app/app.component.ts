@@ -39,7 +39,7 @@ export class AppComponent {
         defaultColDef: {
             resizable: true,
             sortable: true,
-            filter: true
+            filter: true,
         }
     };
 
