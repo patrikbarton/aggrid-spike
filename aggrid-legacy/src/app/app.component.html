@@ -1,42 +1,52 @@
-<div class="container">
-    <!-- App title -->
-    <header class="app-header">
-        🚗 Vehicle Data Explorer
+<div class="app-container">
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">🚗</div>
+            <h1 class="title">
+                Vehicle Data Explorer
+                <span class="subtitle">+ Legacy Benchmarks</span>
+            </h1>
+        </div>
     </header>
 
-    <!-- Toolbar with buttons + search -->
-    <div class="toolbar">
-        <div class="buttons">
-            <button (click)="loadData(50000)">Load 50 000 Rows</button>
-            <button (click)="loadData(100000)">Load 100 000 Rows</button>
-        </div>
-        <div class="search">
-            <input
-                    type="text"
-                    placeholder="Quick search..."
-                    (input)="onQuickFilter($event)"
-            />
-        </div>
-    </div>
+    <nav class="toolbar">
+        <button (click)="runDataLoad(10)">Load 10</button>
+        <button (click)="runDataLoad(20)">Load 20</button>
+        <button (click)="runDataLoad(100)">Load 100</button>
+        <button (click)="runDataLoad(200)">Load 200</button>
+        <button (click)="runDataLoad(1000)">Load 1 000</button>
+        <button (click)="runDataLoad(50000)">Load 50 000</button>
+        <button (click)="runDataLoad(100000)">Load 100 000</button>
+        <button (click)="runDataLoad(1000000)">Load 1 000 000</button>
+        <button (click)="runDataLoad(5000000)">Load 5 000 000</button>
+        <button (click)="runDeltaUpdate()">Delta ±1 000</button>
+        <button (click)="runSort()">Sort by Price</button>
+        <button (click)="runFilter()">Filter “Toyota”</button>
+        <button (click)="runScroll()">Scroll Test</button>
+        <button (click)="runGroup()">Group by Make</button>
+    </nav>
 
-    <!-- Card wrapper around the grid -->
-    <div class="card">
-        <div class="card-body">
-            <div class="grid-wrapper">
-                <ag-grid-angular
-                        class="ag-theme-material"
-                        style="width:100%; height:600px;"
-                        [gridOptions]="gridOptions"
-                        [columnDefs]="columnDefs"
-                        [rowData]="rowData"
-                        (firstDataRendered)="onFirstDataRendered()"
-                        (gridReady)="onGridReady($event)"
-                >
-                </ag-grid-angular>
-            </div>
-        </div>
-        <div class="card-footer">
-            {{ rowData.length || 0 }} rows loaded
-        </div>
-    </div>
+    <main class="main-content">
+        <section class="card grid-card">
+            <ag-grid-angular
+                    class="ag-theme-material"
+                    style="width: 100%; height: 100%;"
+                    [gridOptions]="gridOptions"
+                    [columnDefs]="columnDefs"
+                    [rowData]="rowData"
+                    (gridReady)="onGridReady($event)"
+                    (firstDataRendered)="onFirstDataRendered($event)">
+            </ag-grid-angular>
+        </section>
+
+        <section class="card benchmarks">
+            <h2>Last Run Metrics</h2>
+            <ul>
+                <li *ngFor="let kv of metrics | keyvalue">
+                    <span class="metric-key">{{ kv.key }}</span>
+                    <span class="metric-value">{{ kv.value | number:'1.0-2' }} <small>ms</small></span>
+                </li>
+            </ul>
+        </section>
+    </main>
 </div>

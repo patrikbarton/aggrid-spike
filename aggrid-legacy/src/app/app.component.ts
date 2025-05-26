@@ -1,101 +1,177 @@
-import {Component, OnInit} from '@angular/core';
-import {ColDef, GridOptions, GridApi} from 'ag-grid-community';
+// src/app/app.component.ts
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+    ColDef,
+    GridApi,
+    GridReadyEvent
+} from 'ag-grid-community';
+import { FirstDataRenderedEvent } from 'ag-grid-community/dist/lib/events';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css']
+    styleUrls: ['./app.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit{
+export class AppComponent {
     private gridApi!: GridApi;
 
-    // column definitions
+    rowData: any[] = [];
     columnDefs: ColDef[] = [
         {
             headerName: 'Photo',
-            field:    'imageUrl',
+            field: 'imageUrl',
             cellRenderer: params =>
-                `<img src="${params.value}"
-                      alt="Photo of car"
-                      style="height:40px; width:auto; border-radius:4px">`,
-            width:  80,
+                `<img
+           src="${params.value}"
+           alt="Photo"
+           style="height:40px; width:60%; border-radius:4px"
+         />`
         },
-        {field: 'id', headerName: 'ID', sortable: true, filter: true, width: 100},
-        {field: 'make', headerName: 'Make', sortable: true, filter: true},
-        {field: 'model', headerName: 'Model', sortable: true, filter: true},
-        {field: 'price', headerName: 'Price', sortable: true, filter: true, type: 'numericColumn'},
-        {field: 'value', headerName: 'Value', sortable: true, filter: true, type: 'numericColumn'}
+        { field: 'id',    headerName: 'ID' },
+        { field: 'make',  headerName: 'Make' },
+        { field: 'model', headerName: 'Model' },
+        { field: 'price', headerName: 'Price', type: 'numericColumn' },
+        { field: 'value', headerName: 'Value', type: 'numericColumn' }
     ];
 
-    // data rows
-    rowData: any[] = [];
-
-    // grid options
-    gridOptions: GridOptions = {
-        defaultColDef: { resizable: true },
-        pagination: false,
-        paginationPageSize: 100,
-        rowHeight: 60,
-        rowBuffer: 100,
-        animateRows: true,
-        onGridReady: params => {
-            // remember the API so Quick-Filter still works
-            this.gridApi = params.api;
-            // size columns to fit the grid width
-            params.api.sizeColumnsToFit();
-        },
-        onFirstDataRendered: params => {
-            // also size-to-fit after the first batch arrives
-            params.api.sizeColumnsToFit();
+    gridOptions = {
+        rowHeight: 50,
+        defaultColDef: {
+            resizable: true,
+            sortable: true,
+            filter: true
         }
     };
 
+    /** Holds the last run durations */
+    metrics: Record<string, number> = {};
 
-    // sample data pools
-    private makes = ['Toyota', 'Ford', 'Porsche', 'BMW', 'Mercedes'];
-    private models = ['A', 'B', 'C', 'D', 'E'];
+    private makes  = ['Toyota','Ford','Porsche','BMW','Mercedes'];
+    private models = ['A','B','C','D','E'];
 
-    // generate & load N rows
-    loadData(count: number) {
-        console.time(`Generating ${count}`);
-        const data = Array.from({ length: count }, (_, i) => {
-            // first grab the `make` and `model` into local vars
-            const make  = this.makes[i % this.makes.length];
-            const model = this.models[i % this.models.length];
+    onGridReady(event: GridReadyEvent) {
+        this.gridApi = event.api;
+    }
 
-            // then use that `make` when building your imageUrl
-            return {
-                id:    i + 1,
-                make,
-                model,
-                price: Math.round(Math.random() * 100_000),
-                value: Math.random().toFixed(4),
-                imageUrl: `assets/car-images/${make.toLowerCase()}.png`
-            };
+    // 1) full load: generate → setRowData → firstDataRendered
+    runDataLoad(count: number) {
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        performance.mark('gen-start');
+        const data = Array.from({ length: count }, (_, i) => ({
+            id:    i + 1,
+            make:  this.makes[i % this.makes.length],
+            model: this.models[i % this.models.length],
+            price: Math.round(Math.random() * 100_0000),
+            value: Math.random().toFixed(4),
+            imageUrl: `assets/car-images/${this.makes[i % this.makes.length].toLowerCase()}.png`
+        }));
+        performance.mark('gen-end');
+        performance.measure('genTime','gen-start','gen-end');
+
+        performance.mark('set-start');
+        this.gridApi.setRowData(data);
+        performance.mark('set-end');
+        performance.measure('setTime','set-start','set-end');
+
+        performance.mark('render-start');
+        // render-end is captured in onFirstDataRendered
+    }
+
+    onFirstDataRendered(event: FirstDataRenderedEvent) {
+        performance.mark('render-end');
+        performance.measure('renderTime','render-start','render-end');
+        this.captureMetrics();
+    }
+
+    // 2) delta updates (legacy API)
+    runDeltaUpdate(addCount = 1000, updateCount = 1000, removeCount = 1000) {
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        const adds = Array.from({ length: addCount }, (_, i) => ({
+            id: this.rowData.length + i + 1,
+            make: 'New', model: 'X', price: 0, value: 0, imageUrl: ''
+        }));
+        const updates = this.rowData.slice(0, updateCount).map(r => ({ ...r, price: r.price + 1 }));
+        const removes = this.rowData.slice(-removeCount);
+
+        performance.mark('delta-start');
+        this.gridApi.updateRowData({ add: adds, update: updates, remove: removes });
+        performance.mark('delta-end');
+        performance.measure('deltaTime','delta-start','delta-end');
+
+        this.captureMetrics();
+    }
+
+    // 3) sort via legacy setSortModel
+    runSort(colId = 'price') {
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        performance.mark('sort-start');
+        this.gridApi.setSortModel([{ colId, sort: 'asc' }]);
+        performance.mark('sort-end');
+        performance.measure('sortTime','sort-start','sort-end');
+
+        this.captureMetrics();
+    }
+
+    // 4) quick filter
+    runFilter(filterValue = 'Toyota') {
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        performance.mark('filter-start');
+        this.gridApi.setQuickFilter(filterValue);
+        performance.mark('filter-end');
+        performance.measure('filterTime','filter-start','filter-end');
+
+        this.captureMetrics();
+    }
+
+    // 5) scroll test (frame‐by‐frame)
+    async runScroll() {
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        performance.mark('scroll-start');
+        for (let i = 0; i < this.rowData.length; i += 1000) {
+            this.gridApi.ensureIndexVisible(i, 'top');
+            // wait one frame
+            await new Promise(r => requestAnimationFrame(r));
+        }
+        performance.mark('scroll-end');
+        performance.measure('scrollTime','scroll-start','scroll-end');
+
+        this.captureMetrics();
+    }
+
+    // 6) grouping
+    runGroup(colId = 'make') {
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        // re-create columnDefs with rowGroup flag
+        const defs = this.columnDefs.map(c => ({
+            ...c,
+            rowGroup: c.field === colId
+        }));
+
+        performance.mark('group-start');
+        this.gridApi.setColumnDefs(defs);
+        performance.mark('group-end');
+        performance.measure('groupTime','group-start','group-end');
+
+        this.captureMetrics();
+    }
+
+    private captureMetrics() {
+        performance.getEntriesByType('measure').forEach(m => {
+            this.metrics[m.name] = m.duration;
         });
-        console.timeEnd(`Generating ${count}`);
-
-        console.time(`Setting ${count}`);
-        this.rowData = data;
-        console.timeEnd(`Setting ${count}`);
     }
 
-
-    // AG Grid event hooks
-    onFirstDataRendered() {
-        console.log('First batch rendered');
-    }
-
-    onGridReady(params: any) {
-        this.gridApi = params.api;
-    }
-
-    // quick-filter handler
-    onQuickFilter(event: Event) {
-        const filterText = (event.target as HTMLInputElement).value;
-        this.gridApi.setQuickFilter(filterText);
-    }
-    ngOnInit() {
-        this.loadData(50000);
-    }
 }
