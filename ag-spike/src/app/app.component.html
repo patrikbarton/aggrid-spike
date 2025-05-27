@@ -1,21 +1,40 @@
 <!-- src/app/app.component.html -->
-<div>
-    <div class="toolbar" style="margin-bottom:8px;">
-        <button (click)="runDataLoad()">Load 5k Rows</button>
+<div class="app-container">
+    <nav class="toolbar">
+        <button (click)="runDataLoad(10)">Load 10 Rows</button>
+        <button (click)="runDataLoad(20)">Load 20 Rows</button>
+        <button (click)="runDataLoad(100)">Load 100 Rows</button>
+        <button (click)="runDataLoad(1000)">Load 1000 Rows</button>
+        <button (click)="runDataLoad(5000)">Load 5k Rows</button>
+        <button (click)="runDataLoad(1000000)">Load 1Mil Rows</button>
+
         <button (click)="runDeltaUpdate()">Delta Update</button>
         <button (click)="runSort()">Sort by Price</button>
         <button (click)="runFilter()">Filter “Toyota”</button>
         <button (click)="runScroll()">Scroll Test</button>
         <button (click)="runGroup()">Group by Make</button>
-    </div>
+    </nav>
 
-    <ag-grid-angular
-            class="ag-theme-alpine"
-            style="width:100%; height:600px"
-            [gridOptions]="gridOptions"
-            [columnDefs]="columnDefs"
-            [rowData]="rowData"
-            (gridReady)="onGridReady($event)"
-            (firstDataRendered)="onFirstDataRendered($event)">
-    </ag-grid-angular>
+    <section class="ag-theme-alpine grid-container">
+        <ag-grid-angular
+                [gridOptions]="gridOptions"
+                [columnDefs]="columnDefs"
+                (gridReady)="onGridReady($event)"
+                (firstDataRendered)="onFirstDataRendered($event)"
+                style="width: 100%; height: 600px;"
+        ></ag-grid-angular>
+    </section>
+
+    <!-- newly added metrics display -->
+    <section class="card benchmarks">
+        <h2>Last Run Metrics</h2>
+        <ul>
+            <li *ngFor="let kv of metrics | keyvalue">
+                <span class="metric-key">{{ kv.key }}</span>
+                <span class="metric-value">
+          {{ kv.value | number:'1.0-2' }} <small>ms</small>
+        </span>
+            </li>
+        </ul>
+    </section>
 </div>
