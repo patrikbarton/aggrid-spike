@@ -1,6 +1,8 @@
 // src/main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
+import 'ag-grid-enterprise';
+
 
 // 1. import ModuleRegistry and the bundle you want
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
