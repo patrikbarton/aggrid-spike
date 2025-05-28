@@ -51,8 +51,8 @@ export class AppComponent {
             cellRenderer: (params: ICellRendererParams) =>
                 `<img src="${params.value}" alt="Car" style="height:32px;" />`
         },
-        { field: 'id',     headerName: 'ID',     width: 80 },
-        { field: 'make',   headerName: 'Brand',  flex: 1 },   // renamed to Brand
+        { field: 'id',     headerName: 'ID',     width: 80},
+        { field: 'make',   headerName: 'Brand',  flex: 1},
         { field: 'model',  headerName: 'Model',  flex: 1 },
         {
             field: 'price',
