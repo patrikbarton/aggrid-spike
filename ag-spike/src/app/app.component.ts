@@ -68,6 +68,7 @@ export class AppComponent {
         // identify rows by id so applyTransaction/remove/update will work
         getRowId: params => params.data.id,
         rowHeight: 50,
+        theme: 'legacy',
         defaultColDef: {
             resizable: true,
             sortable: true,
