@@ -7,6 +7,8 @@
         <button (click)="runDataLoad(1000)">Load 1000 Rows</button>
         <button (click)="runDataLoad(5000)">Load 5k Rows</button>
         <button (click)="runDataLoad(1000000)">Load 1Mil Rows</button>
+        <button (click)="runDataLoad(5000000)">Load 5Mil Rows</button>
+
 
         <button (click)="runDeltaUpdate()">Delta Update</button>
         <button (click)="runSort()">Sort by Price</button>
@@ -25,6 +27,16 @@
         ></ag-grid-angular>
     </section>
 
+    <section class="card chart">
+        <h2>Last Run Metrics (Bar Chart)</h2>
+          <canvas
+                baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                type="bar"
+                [plugins]="barChartPlugins">
+          </canvas>
+    </section>
     <!-- newly added metrics display -->
     <section class="card benchmarks">
         <h2>Last Run Metrics</h2>

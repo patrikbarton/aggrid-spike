@@ -1,14 +1,18 @@
 // src/main.ts
-import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-import 'ag-grid-enterprise';
+import {bootstrapApplication} from '@angular/platform-browser';
+import {AppComponent} from './app/app.component';
 
+import {ModuleRegistry, AllCommunityModule} from 'ag-grid-community';
+import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
 
-// 1. import ModuleRegistry and the bundle you want
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { Chart, registerables } from 'chart.js';
+import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
-// 2. register the modules _before_ bootstrapping
-ModuleRegistry.registerModules([ AllCommunityModule ]);
+Chart.register(...registerables, DataLabelsPlugin);
 
-bootstrapApplication(AppComponent)
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+bootstrapApplication(AppComponent, {
+    providers: [provideCharts(withDefaultRegisterables())]
+})
     .catch(err => console.error(err));

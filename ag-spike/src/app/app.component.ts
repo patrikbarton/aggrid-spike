@@ -1,8 +1,5 @@
 // src/app/app.component.ts
-// 1) enable all enterprise features:
-import 'ag-grid-enterprise';
-
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ChangeDetectionStrategy, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AgGridModule } from 'ag-grid-angular';
 import {
@@ -15,6 +12,9 @@ import {
     ModuleRegistry,
     AllCommunityModule
 } from 'ag-grid-community';
+import { BaseChartDirective } from 'ng2-charts';
+import {ChartConfiguration, ChartOptions, ChartType} from "chart.js";
+import DataLabelsPlugin from "chartjs-plugin-datalabels";
 
 // register only the community modules (enterprise modules auto-registered by the import above)
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -22,12 +22,66 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [ CommonModule, AgGridModule ],
+    imports: [ CommonModule, AgGridModule, BaseChartDirective ],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
+    @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
+    // tell ng2-charts which plugins to use
+    public barChartPlugins = [ DataLabelsPlugin ];
+
+    public barChartType: ChartType = 'bar';
+    public barChartData: ChartConfiguration<'bar'>['data'] = {
+        labels: [],            // metric names populated at runtime
+        datasets: [
+            {
+                data: [],          // metric values populated at runtime
+                label: 'ms',
+                datalabels: {
+                    anchor: 'end',
+                    align: 'start',
+                    formatter: (v: number) => v.toFixed(2)
+                }
+            }
+        ]
+    };
+    public barChartOptions: ChartOptions<'bar'> = {
+        responsive: true,
+        plugins: {
+            // enable and configure the datalabels plugin
+            datalabels: {
+                color: 'black',
+                font: { weight: 'bold' },
+                anchor: 'end',
+                align: 'start',
+                formatter: (v: number) => v.toFixed(2) + ' ms'
+            },
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Duration (ms)' } },
+            x: { title: { display: true, text: 'Metric' } }
+        }
+    };
+
+    private captureMetrics() {
+        performance.getEntriesByType('measure').forEach(m => {
+            this.metrics[m.name] = m.duration;
+        });        // then update the chart:
+        const entries = Object.entries(this.metrics);
+        this.barChartData.labels = entries.map(([k]) => k);
+        this.barChartData.datasets[0].data = entries.map(([_, v]) => +v.toFixed(2));
+        this.chart?.update();  // re-draw with labels
+    }
+
+
+
+
+
+    //Grid and Data gathering
     private gridApi!: GridApi;
 
     /** Rows currently in the grid */
@@ -68,6 +122,12 @@ export class AppComponent {
         // identify rows by id so applyTransaction/remove/update will work
         getRowId: params => params.data.id,
         rowHeight: 50,
+
+        //for syncronous loading
+        suppressRowVirtualisation: true,
+        rowModelType: 'clientSide',
+
+        //themes etc
         theme: 'legacy',
         defaultColDef: {
             resizable: true,
@@ -203,10 +263,10 @@ export class AppComponent {
         this.captureMetrics();
     }
 
-    /** Pull all performance.measure() entries into our metrics map */
-    private captureMetrics() {
-        performance.getEntriesByType('measure').forEach(m => {
-            this.metrics[m.name] = m.duration;
-        });
-    }
-}
+//     /** Pull all performance.measure() entries into our metrics map */
+//     private captureMetrics() {
+//         performance.getEntriesByType('measure').forEach(m => {
+//             this.metrics[m.name] = m.duration;
+//         });
+//     }
+ }
