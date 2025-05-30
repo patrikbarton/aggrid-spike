@@ -124,8 +124,8 @@ export class AppComponent {
         rowHeight: 50,
 
         //for syncronous loading
-        suppressRowVirtualisation: true,
-        rowModelType: 'clientSide',
+        // suppressRowVirtualisation: true,
+        // rowModelType: 'clientSide',
 
         //themes etc
         theme: 'legacy',
