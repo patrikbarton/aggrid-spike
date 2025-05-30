@@ -1,10 +1,17 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+// ↓ add ViewChild + ng2-charts imports
+import { Component, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import {
     ColDef,
     GridApi,
     GridReadyEvent
 } from 'ag-grid-community';
 import { FirstDataRenderedEvent } from 'ag-grid-community/dist/lib/events';
+
+// ── CHARTS (v2 API) ─────────────────────────────────────────────────────────────
+import { BaseChartDirective, Label } from 'ng2-charts';
+import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
+// v1 plugin auto-registers itself on import:
+import 'chartjs-plugin-datalabels';
 
 @Component({
     selector: 'app-root',
@@ -13,6 +20,51 @@ import { FirstDataRenderedEvent } from 'ag-grid-community/dist/lib/events';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
+
+    // ── CHART HOOK ────────────────────────────────────────────────────────────────
+    // add these fields alongside your `metrics` etc.
+
+    // ── CHART HOOK & CONFIG ───────────────────────────────────────────────────────
+    @ViewChild(BaseChartDirective, { static: false }) chart!: BaseChartDirective;
+
+    public barChartType: ChartType = 'bar';
+    public barChartLabels: Label[] = [];
+    public barChartData: ChartDataSets[] = [
+        {
+            data: [],
+            label: 'ms',
+            // plugin-specific options:
+            datalabels: {
+                anchor: 'end',
+                align: 'start',
+                formatter: (v: number) => v.toFixed(2)
+            }
+        }
+    ];
+    public barChartOptions: ChartOptions = {
+        responsive: true,
+        legend: { display: false },
+        scales: {
+            xAxes: [{
+                scaleLabel: { display: true, labelString: 'Metric' }
+            }],
+            yAxes: [{
+                ticks: { beginAtZero: true },
+                scaleLabel: { display: true, labelString: 'Duration (ms)' }
+            }]
+        },
+        // plugin namespace matches import name
+        plugins: {
+            datalabels: {
+                color: 'black',
+                font: { weight: 'bold' },
+                anchor: 'end',
+                align: 'start',
+                formatter: (v: number) => v.toFixed(2) + ' ms'
+            }
+        }
+    };
+
     private gridApi!: GridApi;
 
     rowData: any[] = [];
@@ -27,11 +79,11 @@ export class AppComponent {
            style="height:40px; width:60%; border-radius:4px"
          />`
         },
-        { field: 'id',    headerName: 'ID' },
-        { field: 'make',  headerName: 'Make' },
-        { field: 'model', headerName: 'Model' },
-        { field: 'price', headerName: 'Price', type: 'numericColumn' },
-        { field: 'value', headerName: 'Value', type: 'numericColumn' }
+        {field: 'id', headerName: 'ID'},
+        {field: 'make', headerName: 'Make'},
+        {field: 'model', headerName: 'Model'},
+        {field: 'price', headerName: 'Price', type: 'numericColumn'},
+        {field: 'value', headerName: 'Value', type: 'numericColumn'}
     ];
 
     gridOptions = {
@@ -46,8 +98,8 @@ export class AppComponent {
     /** Holds the last run durations */
     metrics: Record<string, number> = {};
 
-    private makes  = ['Toyota','Ford','Porsche','BMW','Mercedes'];
-    private models = ['A','B','C','D','E'];
+    private makes = ['Toyota', 'Ford', 'Porsche', 'BMW', 'Mercedes'];
+    private models = ['A', 'B', 'C', 'D', 'E'];
 
     onGridReady(event: GridReadyEvent) {
         this.gridApi = event.api;
@@ -59,9 +111,9 @@ export class AppComponent {
         performance.clearMeasures();
 
         performance.mark('gen-start');
-        const data = Array.from({ length: count }, (_, i) => ({
-            id:    i + 1,
-            make:  this.makes[i % this.makes.length],
+        const data = Array.from({length: count}, (_, i) => ({
+            id: i + 1,
+            make: this.makes[i % this.makes.length],
             model: this.models[i % this.models.length],
             price: Math.round(Math.random() * 100_0000),
             value: Math.random().toFixed(4),
@@ -102,15 +154,15 @@ export class AppComponent {
         performance.clearMarks();
         performance.clearMeasures();
 
-        const adds = Array.from({ length: addCount }, (_, i) => ({
+        const adds = Array.from({length: addCount}, (_, i) => ({
             id: this.rowData.length + i + 1,
             make: 'New', model: 'X', price: 0, value: 0, imageUrl: ''
         }));
-        const updates = this.rowData.slice(0, updateCount).map(r => ({ ...r, price: r.price + 1 }));
+        const updates = this.rowData.slice(0, updateCount).map(r => ({...r, price: r.price + 1}));
         const removes = this.rowData.slice(-removeCount);
 
         performance.mark('delta-start');
-        this.gridApi.updateRowData({ add: adds, update: updates, remove: removes });
+        this.gridApi.updateRowData({add: adds, update: updates, remove: removes});
         performance.mark('delta-end');
         performance.measure(
             'Delta Update Time',
@@ -127,7 +179,7 @@ export class AppComponent {
         performance.clearMeasures();
 
         performance.mark('sort-start');
-        this.gridApi.setSortModel([{ colId, sort: 'asc' }]);
+        this.gridApi.setSortModel([{colId, sort: 'asc'}]);
         performance.mark('sort-end');
         performance.measure(
             'Sort Time',
@@ -199,9 +251,26 @@ export class AppComponent {
         this.captureMetrics();
     }
 
+    // private captureMetrics() {
+    //     performance.getEntriesByType('measure').forEach(m => {
+    //         this.metrics[m.name] = m.duration;
+    //     });
+    // }
     private captureMetrics() {
+        // gather the raw timings
         performance.getEntriesByType('measure').forEach(m => {
             this.metrics[m.name] = m.duration;
         });
+
+        // feed the chart
+        const entries = Object.entries(this.metrics);
+        this.barChartLabels = entries.map(([k]) => k);
+        this.barChartData[0].data = entries.map(([,v]) => +v.toFixed(2));
+
+        // redraw
+        if (this.chart) {
+            this.chart.update();
+        }
     }
+
 }
