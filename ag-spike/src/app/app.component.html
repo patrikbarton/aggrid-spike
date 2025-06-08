@@ -1,11 +1,7 @@
 <!-- src/app/app.component.html -->
 <div class="app-container">
-    <nav class="toolbar">
-        <button (click)="runDataLoad(10)">Load 10 Rows</button>
-        <button (click)="runDataLoad(20)">Load 20 Rows</button>
-        <button (click)="runDataLoad(100)">Load 100 Rows</button>
-        <button (click)="runDataLoad(1000)">Load 1000 Rows</button>
-        <button (click)="runDataLoad(5000)">Load 5k Rows</button>
+    <nav>
+        <button (click)="runDataLoad(100000)">Load 100 000 Rows</button>
         <button (click)="runDataLoad(1000000)">Load 1Mil Rows</button>
         <button (click)="runDataLoad(5000000)">Load 5Mil Rows</button>
 
@@ -36,17 +32,14 @@
                 type="bar"
                 [plugins]="barChartPlugins">
           </canvas>
-    </section>
-    <!-- newly added metrics display -->
-    <section class="card benchmarks">
-        <h2>Last Run Metrics</h2>
-        <ul>
-            <li *ngFor="let kv of metrics | keyvalue">
-                <span class="metric-key">{{ kv.key }}</span>
-                <span class="metric-value">
-          {{ kv.value | number:'1.0-2' }} <small>ms</small>
-        </span>
-            </li>
-        </ul>
+        <section class="card benchmarks">
+            <h2>Last Run Metrics</h2>
+            <ul>
+                <li *ngFor="let kv of metrics | keyvalue">
+                    <span class="metric-key">{{ kv.key }}</span>
+                    <span class="metric-value-selectable">{{ kv.value | number:'1.0-2' }} ms</span>
+                </li>
+            </ul>
+        </section>
     </section>
 </div>

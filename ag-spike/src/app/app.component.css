@@ -72,3 +72,16 @@ body {
     padding: var(--spacing);
     gap: var(--spacing);
 }
+
+.metric-key {
+    margin-right: 8px;
+}
+
+.metric-value-selectable {
+    display: inline-block;
+    margin-left: 8px;
+    user-select: all;     /* Triple-click selects the whole value with "ms" */
+    white-space: nowrap;  /* Keep value + ms on one line */
+}
+
+
